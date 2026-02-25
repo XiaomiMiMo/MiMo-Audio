@@ -13,6 +13,7 @@ from transformers.generation.streamers import BaseStreamer
 from transformers.generation.utils import (
     GenerateOutput,
     GenerationConfig,
+    GenerationMixin,
     StoppingCriteriaList,
     is_deepspeed_zero3_enabled,
 )
@@ -221,7 +222,12 @@ class MiMoAudioArguments:
         }
 
 
-class MiMoAudioForCausalLM(Qwen2PreTrainedModel):
+class MiMoAudioForCausalLM(Qwen2PreTrainedModel, GenerationMixin):
+    # transformers>=4.50 移除了 PreTrainedModel._supports_cache_class，
+    # 但 prepare_inputs_for_generation 中仍引用它来决定是否传递 cache_position。
+    # MiMo 使用 DynamicCache，显式声明为 True。
+    _supports_cache_class = True
+
     def __init__(
         self,
         config: MiMoAudioConfig | Qwen2Config,
@@ -746,9 +752,10 @@ class MiMoAudioForCausalLM(Qwen2PreTrainedModel):
             this_peer_finished,
             synced_gpus,
             device=input_ids.device,
-            cur_len=cur_len,
-            max_length=max_length,
         ):
+            # 长度检查（transformers>=4.50 不再由 _has_unfinished_sequences 负责）
+            if cur_len >= max_length:
+                break
             # prepare model inputs
             model_inputs = self.prepare_inputs_for_generation(input_ids, **model_kwargs)
 
