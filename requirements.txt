@@ -1,12 +1,11 @@
 accelerate>=1.9.0
-torch==2.6.0
-torchaudio==2.6.0
-transformers==4.49.0
+torch>=2.9.0
+torchaudio>=2.9.0
+transformers>=4.49.0
 fastapi>=0.116.1
 librosa>=0.11.0
 pydantic>=2.11.7
 scipy>=1.16.1
-triton==3.2.0
 uvicorn>=0.35.0
-gradio==5.46.1
-zhon==2.1.1
+gradio>=5.46.1
+zhon>=2.1.1
